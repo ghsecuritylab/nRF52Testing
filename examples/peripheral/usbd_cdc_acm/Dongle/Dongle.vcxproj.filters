@@ -32,5 +32,11 @@
     <None Include="..\make.bat">
       <Filter>Make</Filter>
     </None>
+    <None Include="..\..\..\..\components\toolchain\gcc\Makefile.common">
+      <Filter>Make</Filter>
+    </None>
+    <None Include="..\..\..\..\components\toolchain\gcc\Makefile.windows">
+      <Filter>Make</Filter>
+    </None>
   </ItemGroup>
 </Project>

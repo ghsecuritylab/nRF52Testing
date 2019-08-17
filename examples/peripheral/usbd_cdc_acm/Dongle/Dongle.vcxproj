@@ -93,6 +93,8 @@
     <ClCompile Include="..\main.c" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\components\toolchain\gcc\Makefile.common" />
+    <None Include="..\..\..\..\components\toolchain\gcc\Makefile.windows" />
     <None Include="..\make.bat" />
     <None Include="..\pca10059\Makefile" />
     <None Include="..\pca10059\usbd_cdc_acm_gcc_nrf52.ld" />

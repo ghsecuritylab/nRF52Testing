@@ -1,3 +1,9 @@
-GNU_INSTALL_ROOT := C:/Program Files (x86)/GNU Tools ARM Embedded/7 2018-q2-update/bin/
-GNU_VERSION := 7.3.1
+#GNU_INSTALL_ROOT := C:/Program Files (x86)/GNU Tools ARM Embedded/7 2018-q2-update/bin/
+#GNU_VERSION := 7.3.1
+#GNU_PREFIX := arm-none-eabi
+
+GNU_INSTALL_ROOT := C:/gnu_tools_arm/gcc-arm-none-eabi-8-2019-q3-update-win32/bin/
+GNU_VERSION := 8.3.1
 GNU_PREFIX := arm-none-eabi
+
+
