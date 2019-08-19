@@ -90,8 +90,8 @@ NRF_CLI_DEF(m_cli_uart,
 #define LED_CDC_ACM_RX      (BSP_BOARD_LED_2)
 #define LED_CDC_ACM_TX      (BSP_BOARD_LED_3)
 
-#define BTN_CDC_DATA_SEND       0
-#define BTN_CDC_NOTIFY_SEND     1
+#define BTN_CDC_DATA_SEND       1
+#define BTN_CDC_NOTIFY_SEND     0
 
 #define BTN_CDC_DATA_KEY_RELEASE        (bsp_event_t)(BSP_EVENT_KEY_LAST + 1)
 
@@ -274,8 +274,8 @@ static void init_cli(void)
     ret = bsp_cli_init(bsp_event_callback);
     APP_ERROR_CHECK(ret);
     nrf_drv_uart_config_t uart_config = NRF_DRV_UART_DEFAULT_CONFIG;
-    uart_config.pseltxd = TX_PIN_NUMBER;
-    uart_config.pselrxd = RX_PIN_NUMBER;
+    //uart_config.pseltxd = TX_PIN_NUMBER;
+    //uart_config.pselrxd = RX_PIN_NUMBER;
     uart_config.hwfc    = NRF_UART_HWFC_DISABLED;
     ret = nrf_cli_init(&m_cli_uart, &uart_config, true, true, NRF_LOG_SEVERITY_INFO);
     APP_ERROR_CHECK(ret);
@@ -283,12 +283,18 @@ static void init_cli(void)
     APP_ERROR_CHECK(ret);
 }
 
+
+const uint8_t array[10];
+
 int main(void)
 {
     ret_code_t ret;
     static const app_usbd_config_t usbd_config = {
         .ev_state_proc = usbd_user_ev_handler
     };
+
+	bsp_board_led_on(BSP_BOARD_LED_0);
+	bsp_board_led_on(BSP_BOARD_LED_1);
 
     ret = NRF_LOG_INIT(NULL);
     APP_ERROR_CHECK(ret);

@@ -99,6 +99,10 @@
     <None Include="..\pca10059\Makefile" />
     <None Include="..\pca10059\usbd_cdc_acm_gcc_nrf52.ld" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\components\boards\boards.h" />
+    <ClInclude Include="..\config\sdk_config.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
