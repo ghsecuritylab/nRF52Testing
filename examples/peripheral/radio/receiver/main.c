@@ -163,7 +163,10 @@ int main(void)
 
     while (true)
     {
+		bsp_board_led_on(BSP_BOARD_LED_1);
+
         uint32_t received = read_packet();
+
 
         err_code = bsp_indication_set(BSP_INDICATE_RCV_OK);
         NRF_LOG_INFO("Packet was received");

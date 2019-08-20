@@ -195,10 +195,12 @@ int main(void)
     NRF_LOG_INFO("Press Any Button");
     APP_ERROR_CHECK(err_code);
 
+	bsp_board_led_on(BSP_BOARD_LED_1);
     while (true)
     {
         if (packet != 0)
         {
+			bsp_board_led_on(BSP_BOARD_LED_0);
             send_packet();
             NRF_LOG_INFO("The contents of the package was %u", (unsigned int)packet);
             packet = 0;
