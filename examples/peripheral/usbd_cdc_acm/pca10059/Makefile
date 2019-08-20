@@ -65,6 +65,7 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uart.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_usbd.c \
+  $(SDK_ROOT)/components/drivers_nrf/radio_config/radio_config.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp_cli.c \
   $(PROJ_DIR)/main.c \
@@ -115,6 +116,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/external/fnmatch \
   $(SDK_ROOT)/integration/nrfx \
   $(SDK_ROOT)/external/utf_converter \
+  $(SDK_ROOT)/components/drivers_nrf/radio_config \
   $(SDK_ROOT)/modules/nrfx/drivers/include \
   $(SDK_ROOT)/modules/nrfx/hal \
   $(SDK_ROOT)/external/fprintf \

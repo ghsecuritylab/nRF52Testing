@@ -76,6 +76,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/log/src \
   $(SDK_ROOT)/external/segger_rtt \
   $(SDK_ROOT)/modules/nrfx/hal \
+  $(SDK_ROOT)/components/drivers_nrf/radio_config \
   $(SDK_ROOT)/components/libraries/bsp \
   $(SDK_ROOT)/components/boards \
   $(SDK_ROOT)/components/libraries/timer \

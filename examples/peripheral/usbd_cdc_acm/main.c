@@ -42,6 +42,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
+#include "radio_config.h"
 #include "nrf.h"
 #include "nrf_drv_usbd.h"
 #include "nrf_drv_clock.h"
@@ -226,6 +227,9 @@ static void usbd_user_ev_handler(app_usbd_event_type_t event)
 static void bsp_event_callback(bsp_event_t ev)
 {
     ret_code_t ret;
+
+	m_send_flag = 1;
+
     switch ((unsigned int)ev)
     {
         case CONCAT_2(BSP_EVENT_KEY_, BTN_CDC_DATA_SEND):
@@ -284,7 +288,85 @@ static void init_cli(void)
 }
 
 
-const uint8_t array[10];
+
+static uint32_t                   packet;              /**< Packet to transmit. */
+
+
+/**@brief Function for reading packet.
+ */
+#define RX_STATE_START			0
+#define RX_STATE_ENABLED		1
+#define RX_STATE_PACKET_END		2
+#define RX_STATE_DISABLE		3
+
+static  uint8_t rx_state = RX_STATE_START;
+uint32_t read_packet()
+{
+	uint32_t result = 0;
+
+	if (rx_state == RX_STATE_START)
+	{
+		NRF_RADIO->EVENTS_READY = 0U;
+		// Enable radio and wait for ready
+		NRF_RADIO->TASKS_RXEN = 1U;
+		rx_state = RX_STATE_ENABLED;
+	}
+
+	if (rx_state == RX_STATE_ENABLED)
+	{
+		//while (NRF_RADIO->EVENTS_READY == 0U)
+		if (NRF_RADIO->EVENTS_READY == 0U)
+		{
+			return 0;
+			// wait
+		}
+
+		NRF_RADIO->EVENTS_END = 0U;
+		// Start listening and wait for address received event
+		NRF_RADIO->TASKS_START = 1U;
+
+		rx_state = RX_STATE_PACKET_END;
+	}
+
+	if (rx_state == RX_STATE_PACKET_END)
+	{
+		// Wait for end of packet or buttons state changed
+		//while (NRF_RADIO->EVENTS_END == 0U)
+		if (NRF_RADIO->EVENTS_END == 0U)
+		{
+			return 0;
+			// wait
+		}
+
+		if (NRF_RADIO->CRCSTATUS == 1U)
+		{
+			result = packet;
+		}
+
+		NRF_RADIO->EVENTS_DISABLED = 0U;
+		// Disable radio
+		NRF_RADIO->TASKS_DISABLE = 1U;
+
+		rx_state = RX_STATE_DISABLE;
+	}
+
+	if (rx_state == RX_STATE_DISABLE)
+	{
+		//while (NRF_RADIO->EVENTS_DISABLED == 0U)
+		if(NRF_RADIO->EVENTS_DISABLED == 0U)
+		{
+			return 0;
+			// wait
+		}
+
+		rx_state = RX_STATE_START;
+		return result;
+	}
+
+	return 0;
+}
+
+uint32_t received = 0;
 
 int main(void)
 {
@@ -338,6 +420,12 @@ int main(void)
         app_usbd_start();
     }
 
+	// Radio Init
+	radio_configure();
+	NRF_RADIO->PACKETPTR = (uint32_t)&packet;
+	bsp_indication_set(BSP_INDICATE_USER_STATE_OFF);
+
+
     while (true)
     {
         while (app_usbd_event_queue_process())
@@ -356,13 +444,23 @@ int main(void)
             {
                 ++frame_counter;
             }
+
+			m_send_flag = 0;
         }
         
         nrf_cli_process(&m_cli_uart);
 
-        UNUSED_RETURN_VALUE(NRF_LOG_PROCESS());
+		received = read_packet();
+		if (received)
+		{
+			m_send_flag = 1;
+			bsp_indication_set(BSP_INDICATE_RCV_OK);
+		}
+
+        //UNUSED_RETURN_VALUE(NRF_LOG_PROCESS());
         /* Sleep CPU only if there was no interrupt since last loop processing */
-        __WFE();
+        //__WFE();
+
     }
 }
 
