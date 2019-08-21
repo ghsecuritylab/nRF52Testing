@@ -268,7 +268,7 @@ static  uint8_t rx_state = RX_STATE_START;
 
 uint32_t read_packet()
 {
-	uint32_t result = 0;
+	static uint32_t result = 0;
 
 	if (rx_state == RX_STATE_START)
 	{

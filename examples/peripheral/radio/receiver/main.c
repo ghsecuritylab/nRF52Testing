@@ -93,41 +93,122 @@ void clock_initialization()
 
 /**@brief Function for reading packet.
  */
+//uint32_t read_packet()
+//{
+//    uint32_t result = 0;
+//
+//    NRF_RADIO->EVENTS_READY = 0U;
+//    // Enable radio and wait for ready
+//    NRF_RADIO->TASKS_RXEN = 1U;
+//
+//    while (NRF_RADIO->EVENTS_READY == 0U)
+//    {
+//        // wait
+//    }
+//    NRF_RADIO->EVENTS_END = 0U;
+//    // Start listening and wait for address received event
+//    NRF_RADIO->TASKS_START = 1U;
+//
+//    // Wait for end of packet or buttons state changed
+//    while (NRF_RADIO->EVENTS_END == 0U)
+//    {
+//        // wait
+//    }
+//
+//    if (NRF_RADIO->CRCSTATUS == 1U)
+//    {
+//        result = packet;
+//    }
+//    NRF_RADIO->EVENTS_DISABLED = 0U;
+//    // Disable radio
+//    NRF_RADIO->TASKS_DISABLE = 1U;
+//
+//    while (NRF_RADIO->EVENTS_DISABLED == 0U)
+//    {
+//        // wait
+//    }
+//    return result;
+//}
+
+#define RX_STATE_START			0
+#define RX_STATE_ENABLED		1
+#define RX_STATE_PACKET_END		2
+#define RX_STATE_DISABLE		3
+
+static  uint8_t rx_state = RX_STATE_START;
+
 uint32_t read_packet()
 {
-    uint32_t result = 0;
+	static uint32_t result = 0;
 
-    NRF_RADIO->EVENTS_READY = 0U;
-    // Enable radio and wait for ready
-    NRF_RADIO->TASKS_RXEN = 1U;
+	if (rx_state == RX_STATE_START)
+	{
+		NRF_RADIO->EVENTS_READY = 0U;
+		// Enable radio and wait for ready
+		NRF_RADIO->TASKS_RXEN = 1U;
+		rx_state = RX_STATE_ENABLED;
+		bsp_board_led_on(3);
+	}
 
-    while (NRF_RADIO->EVENTS_READY == 0U)
-    {
-        // wait
-    }
-    NRF_RADIO->EVENTS_END = 0U;
-    // Start listening and wait for address received event
-    NRF_RADIO->TASKS_START = 1U;
+	if (rx_state == RX_STATE_ENABLED)
+	{
+		//while (NRF_RADIO->EVENTS_READY == 0U)
+		if (NRF_RADIO->EVENTS_READY == 0U)
+		{
+			return 0;
+			// wait
+		}
 
-    // Wait for end of packet or buttons state changed
-    while (NRF_RADIO->EVENTS_END == 0U)
-    {
-        // wait
-    }
+		NRF_RADIO->EVENTS_END = 0U;
+		// Start listening and wait for address received event
+		NRF_RADIO->TASKS_START = 1U;
 
-    if (NRF_RADIO->CRCSTATUS == 1U)
-    {
-        result = packet;
-    }
-    NRF_RADIO->EVENTS_DISABLED = 0U;
-    // Disable radio
-    NRF_RADIO->TASKS_DISABLE = 1U;
+		rx_state = RX_STATE_PACKET_END;
+		bsp_board_led_off(3);
+		bsp_board_led_on(2);
+	}
 
-    while (NRF_RADIO->EVENTS_DISABLED == 0U)
-    {
-        // wait
-    }
-    return result;
+	if (rx_state == RX_STATE_PACKET_END)
+	{
+		// Wait for end of packet or buttons state changed
+		//while (NRF_RADIO->EVENTS_END == 0U)
+		if (NRF_RADIO->EVENTS_END == 0U)
+		{
+			return 0;
+			// wait
+		}
+
+		if (NRF_RADIO->CRCSTATUS == 1U)
+		{
+			result = packet;
+		}
+
+		NRF_RADIO->EVENTS_DISABLED = 0U;
+		// Disable radio
+		NRF_RADIO->TASKS_DISABLE = 1U;
+
+		rx_state = RX_STATE_DISABLE;
+
+		m_send_flag = 1;
+
+		bsp_board_led_off(2);
+		bsp_board_led_on(1);
+	}
+
+	if (rx_state == RX_STATE_DISABLE)
+	{
+		//while (NRF_RADIO->EVENTS_DISABLED == 0U)
+		if (NRF_RADIO->EVENTS_DISABLED == 0U)
+		{
+			return 0;
+			// wait
+		}
+
+		rx_state = RX_STATE_START;
+		return result;
+	}
+
+	return 0;
 }
 
 
@@ -167,13 +248,15 @@ int main(void)
 
         uint32_t received = read_packet();
 
+		if (received != 0)
+		{
+			err_code = bsp_indication_set(BSP_INDICATE_RCV_OK);
+			NRF_LOG_INFO("Packet was received");
+			APP_ERROR_CHECK(err_code);
 
-        err_code = bsp_indication_set(BSP_INDICATE_RCV_OK);
-        NRF_LOG_INFO("Packet was received");
-        APP_ERROR_CHECK(err_code);
-
-        NRF_LOG_INFO("The contents of the package is %u", (unsigned int)received);
-        NRF_LOG_FLUSH();
+			NRF_LOG_INFO("The contents of the package is %u", (unsigned int)received);
+			NRF_LOG_FLUSH();
+		}
     }
 }
 
