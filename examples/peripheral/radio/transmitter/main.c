@@ -64,6 +64,8 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
+#include "nrf_delay.h"
+
 static uint32_t                   packet;                    /**< Packet to transmit. */
 
 /**@brief Function for sending packet.
@@ -203,10 +205,10 @@ int main(void)
 			bsp_board_led_on(BSP_BOARD_LED_0);
             send_packet();
             NRF_LOG_INFO("The contents of the package was %u", (unsigned int)packet);
-            packet = 0;
         }
         NRF_LOG_FLUSH();
-        __WFE();
+		nrf_delay_ms(200);
+		packet++;
     }
 }
 
